@@ -17,9 +17,21 @@ public class Target : MonoBehaviour, IPointerClickHandler
     public int point;
     public ParticleSystem explosionParticle;
 
+    private GameManager gm;
+
+    private void Awake()
+    {
+        gm = FindAnyObjectByType<GameManager>();
+    }
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        rb.AddForce(RandomForce(), ForceMode.Impulse);
+        rb.AddTorque(RandomTorque(), RandomTorque(), RandomTorque());
+        transform.position = RandomSpawnPos();
+
+
     }
 
     Vector3 RandomForce()
@@ -40,11 +52,29 @@ public class Target : MonoBehaviour, IPointerClickHandler
     // NOTE: OnPointerClick is part of IPointerClickHandler interface
     public void OnPointerClick(PointerEventData eventData)
     {
+        //var go = GameObject.Find("GameManager");
+        //var gm = go.GetComponent<GameManager>();
+        
 
+        gm.UpdateScore(point);
+
+        //Debug.Log("click");
+        Instantiate(explosionParticle, transform.position, Quaternion.identity);
+        Destroy(gameObject);
+        
     }
 
     private void OnTriggerEnter(Collider other)
     {
-
+        if (other.gameObject.CompareTag("Sensor")) 
+        {
+            if (!(gameObject.CompareTag("Bad"))) 
+            {
+                gm.UpdateScore(-1);
+            }
+            
+            Destroy(gameObject);
+            
+        }
     }
 }
